@@ -1,3 +1,12 @@
-# Ignore venv folder
+# Ignore folders
 venv/
 papers/
+ceia/lectures/
+schrodinger/*
+
+# Ignore all .pyc files
+*.pyc
+
+# Ignore files
+ceia/projects/1/nektar_vort2d_Re100Ri1.dat
+ceia/projects/2/dataset.csv
