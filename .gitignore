@@ -1,12 +1,10 @@
 # Ignore folders
 venv/
 papers/
-ceia/lectures/
-schrodinger/*
 
 # Ignore all .pyc files
 *.pyc
 
-# Ignore files
-ceia/projects/1/nektar_vort2d_Re100Ri1.dat
-ceia/projects/2/dataset.csv
+# Ignore large files
+uba/projects/inverse_heat_transfer/nektar_vort2d_Re100Ri1.dat
+uba/projects/wave_propagation/dataset.csv
