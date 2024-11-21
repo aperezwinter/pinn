@@ -177,8 +177,8 @@ $$
 \begin{aligned}
 u_x^2 =& f^2 - (\eta+h)^2 f f_{,xx} + \dfrac{(\eta+h)^4}{4} f_{,xx}^2 + 
 \dfrac{(\eta+h)^4}{12} f f_{,xxxx} + \ldots \\
-u_z^2 =& (\eta+h)^2 f_{,x}^2 - \dfrac{(\eta+h)^4}{3} f_{,x} f_{,xxx} 
-+ \dfrac{(\eta+h)^6}{36} f_{,xxx}^2 + \ldots
+u_z^2 =& (\eta+h)^2 f_{,x}^2 - \dfrac{(\eta+h)^4}{3} f_{,x} f_{,xxx} + 
+\dfrac{(\eta+h)^6}{36} f_{,xxx}^2 + \ldots
 \end{aligned}
 $$
 
@@ -195,8 +195,10 @@ $$
 Reemplazando estas expresiones en la ecuación de la condición de borde en la superficie libre, se obtiene:
 
 $$
+\begin{aligned}
 0 =& \dfrac{\partial }{\partial t}\left( f - \dfrac{(\eta+h)^2}{2} f_{,xx} + \ldots \right) + \ldots \notag\\
 & \ldots + \dfrac{1}{2} \dfrac{\partial }{\partial x} \bigg( f^2 + (\eta+h)^2 \left( f_{,x}^2 - f f_{,xx} \right) + \ldots \bigg) + g \eta_{,x} + \ldots
+\end{aligned}
 $$
 
 Repasando, tenemos a $f(x,t)$ como la velocidad horizontal en el fondo del canal, y a $\eta(x,t)$ como la altura de la superficie libre respecto del reposo.
