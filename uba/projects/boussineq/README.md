@@ -273,10 +273,10 @@ $$ \tilde\eta_{,tt} - \tilde\eta_{,xx} - \tilde\eta_{,xx} \left( 3\tilde\eta^2 +
 ## Condiciones de borde
 Como hemos visto, se tiene un problema de propagación de ondas, por lo tanto se propone que no haya ondas entrantes al dominio. Ergo, utilizando la factorización de la ecuación de propagación, podemos escribir para el borde derecho:
 
-$$ \frac{\partial \tilde\eta}{\partial \tilde t}\bigg|_{\tilde x=b} = -\frac{\partial \tilde\eta}{\partial \tilde x}\bigg|_{\tilde x=b} $$
+$$ \dfrac{\partial \tilde\eta}{\partial \tilde t}\bigg|_{\tilde x=b} = -\dfrac{\partial \tilde\eta}{\partial \tilde x} \bigg|_{\tilde x=b} $$
 
 y para el borde izquierdo:
 
-$$ \dfrac{\partial \tilde \eta}{\partial \tilde t}\|_{\tilde x=a} = \dfrac{\partial \tilde \eta}{\partial \tilde x}\|_{\tilde x=a} $$
+$$ \dfrac{\partial \tilde \eta}{\partial \tilde t} \bigg|_{\tilde x=a} = \dfrac{\partial \tilde \eta}{\partial \tilde x} \bigg|_{\tilde x=a} $$
 
 donde $a$ y $b$ son las coordenadas del borde izquierdo y derecho, respectivamente.
