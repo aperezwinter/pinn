@@ -241,34 +241,34 @@ $$ \eta(x,t) = \eta_+(x-c\,t) + \eta_-(x+c\,t) $$
 Además la ecuación de onda puede ser factorizada como:
 
 $$ 
-\left( \frac{\partial}{\partial t} + c \frac{\partial}{\partial x} \right) 
-\left( \frac{\partial}{\partial t} - c \frac{\partial}{\partial x} \right) 
+\left( \dfrac{\partial}{\partial t} + c \dfrac{\partial}{\partial x} \right) 
+\left( \dfrac{\partial}{\partial t} - c \dfrac{\partial}{\partial x} \right) 
 \eta = 0\, \quad c = \sqrt{g\,h}
 $$
 
 de donde se desprende, por ejemplo, que:
 
-$$ \eta_{,t} = -\sqrt{gh}\,\eta_{,x} $$
+$$ \eta_{,t} = -\sqrt{gh}\, \eta_{,x} $$
 
 y haciendo uso del analisis de escalas características, se obtiene la relación entre $f$ y $\eta$:
 
-$$ f = \sqrt{\frac{g}{h}}\,\eta + \text{cte} $$
+$$ f = \sqrt{\dfrac{g}{h}}\,\eta + \text{cte} $$
 
 Teniendo en cuneta que dicha expresión para $f$ será reemplazada en el sistema de 2 ecuaciones y que solo parecen derivadas de $f$, la constante de integración se desprecia. Primero se reemplaza a $f$ por su expresión en todos los términos de ambas ecuaciones, luego se deriva la primera ecuación con respecto a $t$ y la segunda con respecto a $x$, se restan ambas ecuaciones y se obtiene:
 
 $$ \eta_{,tt} - gh\,\eta_{,xx} - gh\,\frac{\partial^2}{\partial x^2} \left( 
-\frac{3}{2}\frac{\eta^2}{h} - \frac{h^2}{3} \eta_{,xx} \right) = 0 $$
+\dfrac{3}{2}\frac{\eta^2}{h} - \dfrac{h^2}{3} \eta_{,xx} \right) = 0 $$
 
 la cual se conoce como ecuación de Boussinesq para la altura de la superficie libre. Vale aclarar que hemos llegado a esta ecuación bajo la idea de que la onda solo se transporta, osea no se deforma. ¿Qué sucede si la solución en realidad si se deforma un poco? En realidad, este fenómeno tiene sentido ya que es producto de los dos últimos términos los cuales son de menor efecto frente a los dos primeros (mediante analisis de caracterisitcas de escala).
 
 ## Adimensionalización
 Tomando los siguientes parámetros de referencia:
 
-$$ \eta^* = 2h\, \quad t^* = \sqrt{\frac{h}{3g}}\, \quad x^* = \frac{h}{\sqrt{3}} $$
+$$ \eta^* = 2h\, \quad t^* = \sqrt{\dfrac{h}{3g}}\, \quad x^* = \dfrac{h}{\sqrt{3}} $$
 
 la ecuación de Boussinesq, adimensionalizada, para la altura de la superficie libre resulta:
 
-$$ \tilde\eta_{,tt} - \tilde\eta_{,xx} - \tilde\eta_{,xx} \left( 3\tilde\eta^2 + \tilde\eta_{,xx} \right) = 0 $$
+$$ \tilde \eta_{,tt} - \tilde \eta_{,xx} - \tilde \eta_{,xx} \left( 3\tilde \eta^2 + \tilde \eta_{,xx} \right) = 0 $$
 
 ## Condiciones de borde
 Como hemos visto, se tiene un problema de propagación de ondas, por lo tanto se propone que no haya ondas entrantes al dominio. Ergo, utilizando la factorización de la ecuación de propagación, podemos escribir para el borde derecho:
@@ -278,7 +278,5 @@ $$ \dfrac{\partial \tilde\eta}{\partial \tilde t}\bigg|_{\tilde x=b} = -\dfrac{\
 y para el borde izquierdo:
 
 $$ \dfrac{\partial \tilde \eta}{\partial \tilde t} \bigg|_{\tilde x=a} = \dfrac{\partial \tilde \eta}{\partial \tilde x} \bigg|_{\tilde x=a} $$
-
-$$ \bigg|_{\tilde x=a} $$
 
 donde $a$ y $b$ son las coordenadas del borde izquierdo y derecho, respectivamente.
