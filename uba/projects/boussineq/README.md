@@ -216,15 +216,14 @@ $$
 
 Intiutivamente pensamos que $u_0 \gg f_0$, ya que la superficie se mueve mucho más que el fondo. Más adelante se demostrará que esta suposición es correcta, y que por lo tanto $f_0/u_0 \sim a/h$ y además $u_0 \simeq \sqrt{gh}$, siendo esta última la velocidad de propagación de las ondas. Utilizando estas relaciones, y considerando que los términos más pequeños a incluir van como $\sim a h^2/\lambda^3$ (si hay algún término con $a^2/\lambda^2$ se desprecia también), se obtiene el siguiente sistema de ecuaciones:
 
-$
+$$
 \begin{aligned}
 & \dfrac{\partial \eta}{\partial t} + \dfrac{\partial}{\partial x} \bigg( (\eta+h)f \bigg) =
 \dfrac{h^3}{6} \dfrac{\partial^3 f}{\partial x^3} \\
 & \dfrac{\partial f}{\partial t} + f \dfrac{\partial f}{\partial x} + 
 g \dfrac{\partial \eta}{\partial x} = \dfrac{h^2}{2} \dfrac{\partial }{\partial t} \left( \dfrac{\partial^2 f}{\partial x^2} \right)
-
 \end{aligned}
-$
+$$
 
 
 $$
