@@ -44,8 +44,7 @@ Partiendo de la ecuación de Euler y reemplazando el campo de velocidades por su
 $$
 \frac{\partial \nabla \Psi}{\partial t} + 
 \nabla \Psi \times (\nabla \times \nabla \Psi) + 
-\frac{1}{2} \nabla |\mathbf{u}|^2 = 
-- \nabla \phi - \frac{1}{\rho} \nabla p
+\frac{1}{2} \nabla |\mathbf{u}|^2 = - \nabla \phi - \frac{1}{\rho} \nabla p
 $$
 
 Recordando que el rotacional de un gradiente es cero, se obtiene:
