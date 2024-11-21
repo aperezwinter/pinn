@@ -279,4 +279,6 @@ y para el borde izquierdo:
 
 $$ \dfrac{\partial \tilde \eta}{\partial \tilde t} \bigg|_{\tilde x=a} = \dfrac{\partial \tilde \eta}{\partial \tilde x} \bigg|_{\tilde x=a} $$
 
+$$ \bigg|_{\tilde x=a} $$
+
 donde $a$ y $b$ son las coordenadas del borde izquierdo y derecho, respectivamente.
