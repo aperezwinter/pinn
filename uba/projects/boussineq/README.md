@@ -219,7 +219,7 @@ Intiutivamente pensamos que $u_0 \gg f_0$, ya que la superficie se mueve mucho m
 $$
 \begin{aligned}
 & \dfrac{\partial \eta}{\partial t} + \dfrac{\partial}{\partial x} \bigg( (\eta+h)f \bigg) =
-\dfrac{h^3}{6} \dfrac{\partial^3 f}{\partial x^3} \\[5pt]
+\dfrac{h^3}{6} \dfrac{\partial^3 f}{\partial x^3} \\[0.5em]
 & \dfrac{\partial f}{\partial t} + f \dfrac{\partial f}{\partial x} + g \dfrac{\partial \eta}{\partial x} = 
 \dfrac{h^2}{2} \dfrac{\partial }{\partial t} \left( \dfrac{\partial^2 f}{\partial x^2} \right)
 \end{aligned}
