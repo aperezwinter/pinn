@@ -107,10 +107,8 @@ $$ \Psi = \Psi(x, z, t) $$
 
 y desarrollando en serie de Taylor alrededor de $z=-h$ se obtiene:
 
-$$ 
-\Psi = \Psi\big|_{z=-h} + (z+h) \frac{\partial \Psi}{\partial z} \bigg|_{z=-h} +
-\frac{(z+h)^2}{2} \frac{\partial^2 \Psi}{\partial z^2} \bigg|_{z=-h} + \cdots
-$$
+$$ \Psi = \Psi\big|_{z=-h} + (z+h) \frac{\partial \Psi}{\partial z} \bigg|_{z=-h} +
+\frac{(z+h)^2}{2} \frac{\partial^2 \Psi}{\partial z^2} \bigg|_{z=-h} + \cdots $$
 
 Como el fluido es incompresible, entonces $\nabla \cdot \mathbf{u} = 0$, por lo tanto $\nabla \cdot \nabla \Psi = \Delta \Psi = 0$, es decir, $\Psi$ es armónica, lo cual se expresa como:
 
