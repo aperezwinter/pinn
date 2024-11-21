@@ -51,17 +51,14 @@ Recordando que el rotacional de un gradiente es cero, se obtiene:
 
 $$
 \nabla \frac{\partial \Psi}{\partial t} + 
-\frac{1}{2} \nabla |\mathbf{u}|^2 = 
-- \nabla \phi - \frac{1}{\rho} \nabla p
+\frac{1}{2} \nabla |\mathbf{u}|^2 = - \nabla \phi - \frac{1}{\rho} \nabla p
 $$
 
 Luego aplicando la definición sobre la integral total, se obtiene:
 
 $$
-\int \nabla \left( \frac{\partial \Psi}{\partial t} + 
-\frac{1}{2} |\mathbf{u}|^2 \right) \cdot d\mathbf{x} = 
-- \int \nabla \phi \cdot d\mathbf{x} 
-- \frac{1}{\rho} \int \nabla p \cdot d\mathbf{x}
+\int \nabla \left( \frac{\partial \Psi}{\partial t} + \frac{1}{2} |\mathbf{u}|^2 \right) \cdot d\mathbf{x} 
+= - \int \nabla \phi \cdot d\mathbf{x} - \frac{1}{\rho} \int \nabla p \cdot d\mathbf{x}
 $$
 
 donde al integral en la variable espacial, la constante resultante es dependiente del tiempo. La ecuación resultante se expresa como:
