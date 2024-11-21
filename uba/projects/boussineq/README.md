@@ -138,8 +138,10 @@ $$
 Utilizando las relaciones encontradas para las derivadas parciales de $\Psi$ del laplaciano y bilaplaciano, se obtiene:
 
 $$
+\begin{aligned}
 \Psi =& \left[ \Psi\big|_{-h} - \dfrac{(z+h)^2}{2} \Psi_{,xx} \bigg|_{-h} + \dfrac{(z+h)^4}{24} \Psi_{,xxxx} \bigg|_{-h} \right] + \ldots \notag\\
 & \ldots + \left[ (z+h) \Psi_{,z} \bigg|_{-h} - \dfrac{(z+h)^3}{6} \dfrac{\partial^2 \Psi_{,z}}{\partial x^2} \bigg|_{-h} \right] + \ldots
+\end{aligned}
 $$
 
 Luego por definición tenemos que $\Psi_{,z} = u_z$ y considerando que en $z=-h$ el suelo no es permeable, entonces $u_z = 0$, por lo tanto la ecuación anterior se reduce a:
@@ -152,8 +154,10 @@ $$
 donde hemos introducido la notación para la derivada parcial respecto a $x_i$ como $f_{,i}$. Esta aproximación de Taylor es válida para un fluido no viscoso e incompresible de forma exacta, ya que no hemos truncado la serie de Taylor. Cuando se trunca la misma a un número finito de términos, se obtiene la aproximación de Boussinesq. En consecuencia, podemos resolver lo que ocurre en la superficie libre, a partir de lo que ocurre en el fondo del canal. Por esta razón es que este análisis es válido para aguas poco profundas. Dado que tengo una expresión analítica para $\Psi(x,t)$, puedo derivar expresiones analíticas para el campo de velocidades. Sea $f(x,t) := u_x(x,-h,t) = \Psi_{,x}(x,-h,t)$, entonces:
 
 $$
+\begin{aligned}
 u_x =& \Psi_{,x} = f - \dfrac{(z+h)^2}{2} f_{,xx} + \dfrac{(z+h)^4}{24} f_{,xxxx} - \ldots \\
 u_z =& \Psi_{,z} = - (z+h) f_{,x} + \dfrac{(z+h)^3}{6} f_{,xxx} -\ldots
+\end{aligned}
 $$
 
 por lo que hemos encontrado expresiones analíticas para el campo de velocidades en todo el canal en función de lo que ocurre en el fondo. Reemplazando los campos de velocidades en la ecuación cinemática de la condición de borde, se obtiene:
@@ -170,18 +174,22 @@ $$ \dfrac{\partial u_x}{\partial t} + \dfrac{1}{2} \left( u_x^2 + u_z^2 \right)_
 Los términos cuadráticos del campo de velocidades se pueden expresar como:
 
 $$
+\begin{aligned}
 u_x^2 =& f^2 - (\eta+h)^2 f f_{,xx} + \dfrac{(\eta+h)^4}{4} f_{,xx}^2 + 
 \dfrac{(\eta+h)^4}{12} f f_{,xxxx} + \ldots \\
 u_z^2 =& (\eta+h)^2 f_{,x}^2 - \dfrac{(\eta+h)^4}{3} f_{,x} f_{,xxx} 
 + \dfrac{(\eta+h)^6}{36} f_{,xxx}^2 + \ldots
+\end{aligned}
 $$
 
 por lo tanto la suma de ambos resulta en:
 
 $$
+\begin{aligned}
 u_x^2 + u_z^2 =& f^2 + (\eta+h)^2 \left( f_{,x}^2 - f f_{,xx} \right) + \ldots \notag\\
 & + (\eta+h)^4 \left( \dfrac{f_{,xx}^2}{4} - \dfrac{f_{,x} f_{,xxx}}{3} + \dfrac{f f_{,xxxx}}{12} \right) + \ldots \notag\\ 
 & + \dfrac{(\eta+h)^6}{36} f_{,xxx}^2 + \ldots
+\end{aligned}
 $$
 
 Reemplazando estas expresiones en la ecuación de la condición de borde en la superficie libre, se obtiene:
@@ -219,18 +227,10 @@ Intiutivamente pensamos que $u_0 \gg f_0$, ya que la superficie se mueve mucho m
 $$
 \begin{aligned}
 & \dfrac{\partial \eta}{\partial t} + \dfrac{\partial}{\partial x} \bigg( (\eta+h)f \bigg) =
-\dfrac{h^3}{6} \dfrac{\partial^3 f}{\partial x^3} \\[0.5em]
+\dfrac{h^3}{6} \dfrac{\partial^3 f}{\partial x^3} \\
 & \dfrac{\partial f}{\partial t} + f \dfrac{\partial f}{\partial x} + g \dfrac{\partial \eta}{\partial x} = 
 \dfrac{h^2}{2} \dfrac{\partial }{\partial t} \left( \dfrac{\partial^2 f}{\partial x^2} \right)
 \end{aligned}
-$$
-
-
-$$
-& \dfrac{\partial \eta}{\partial t} + \dfrac{\partial}{\partial x} \bigg( (\eta+h)f \bigg) = 
-\dfrac{h^3}{6} \dfrac{\partial^3 f}{\partial x^3} \\
-& \dfrac{\partial f}{\partial t} + f \dfrac{\partial f}{\partial x} + 
-g \dfrac{\partial \eta}{\partial x} = \dfrac{h^2}{2} \dfrac{\partial }{\partial t} \left( \dfrac{\partial^2 f}{\partial x^2} \right)
 $$
 
 Estas son las ecuaciones de Boussinesq para ondas no lineales en aguas poco profundas. Si a su vez se enfatiza en que $\lambda \gg h$, los términos del lado derecho de ambas ecuaciones se anulan.
