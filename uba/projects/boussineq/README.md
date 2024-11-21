@@ -268,7 +268,7 @@ $$ \eta^* = 2h\, \quad t^* = \sqrt{\frac{h}{3g}}\, \quad x^* = \frac{h}{\sqrt{3}
 
 la ecuación de Boussinesq, adimensionalizada, para la altura de la superficie libre resulta:
 
-$$ \tilde{\eta}_{,tt} - \tilde{\eta}_{,xx} - \tilde{\eta}_{,xx} \left( 3\tilde{\eta}^2 + \tilde{\eta}_{,xx} \right) = 0 $$
+$$ \tilde\eta_{,tt} - \tilde\eta_{,xx} - \tilde\eta_{,xx} \left( 3\tilde\eta^2 + \tilde\eta_{,xx} \right) = 0 $$
 
 ## Condiciones de borde
 Como hemos visto, se tiene un problema de propagación de ondas, por lo tanto se propone que no haya ondas entrantes al dominio. Ergo, utilizando la factorización de la ecuación de propagación, podemos escribir para el borde derecho:
