@@ -1,0 +1,9 @@
+numpy
+matplotlib==3.7.2
+torch
+torchvision
+torchmetrics
+torchsummary
+pytorch-lightning
+scipy==1.11.3
+pyDOE==0.3.8
