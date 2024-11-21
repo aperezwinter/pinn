@@ -2,6 +2,7 @@
 
 ## Introducción
 La teoría de ondas de Boussinesq es una aproximación para describir las ondas de gravedad en aguas poco profundas. Sea un fluido incompresible y no viscoso, con una superficie libre. Se describe el campo de velocidades y la presión en el fluido mediante la ecuación de Euler y la ecuación de continuidad:
+
 $$
 \frac{\partial \mathbf{u}}{\partial t} + 
 (\mathbf{u} \cdot \nabla) \mathbf{u} = 
@@ -13,194 +14,131 @@ $$ \nabla \cdot \mathbf{u} = 0 $$
 En notación indicial, las ecuaciones anteriores se escriben como:
 
 $$
-\frac{\partial u_i}{\partial t} + u_j \frac{\partial u_i}{\partial x_j} = g_i - \frac{1}{\rho} \frac{\partial p}{\partial x_i}
+\frac{\partial u_i}{\partial t} + u_j \frac{\partial u_i}{\partial x_j} = 
+g_i - \frac{1}{\rho} \frac{\partial p}{\partial x_i}
 $$
 
-$$
-\begin{equation}
-    \frac{\partial u_i}{\partial x_i} = 0
-\end{equation}
-$$
+$$ \frac{\partial u_i}{\partial x_i} = 0 $$
 
 para el término convectivo tenemos la siguiente identidad:
 
 $$
-\begin{equation}
-    (\mathbf{u} \cdot \nabla) \mathbf{u} = 
-    \mathbf{u} \times (\nabla \times \mathbf{u}) + 
-    \frac{1}{2} \nabla |\mathbf{u}|^2
-\end{equation}
+(\mathbf{u} \cdot \nabla) \mathbf{u} = 
+\mathbf{u} \times (\nabla \times \mathbf{u}) + 
+\frac{1}{2} \nabla |\mathbf{u}|^2
 $$
 
 Vamos a usar una función potencial $\Psi$ para describir el campo de velocidades y otra función potencial $\phi$ para el campo gravitatorio.
 
-$$
-\begin{equation}
-    \mathbf{u} = \nabla \Psi\, \quad \mathbf{g} = - \nabla \phi\,.
-\end{equation}
-$$
+$$ \mathbf{u} = \nabla \Psi\, \quad \mathbf{g} = - \nabla \phi. $$
 
 Antes de continuar, nos será de utilidad recordar la siguiente definición para el diferencial total de una función $f$ de varias variables:
 
 $$
-\begin{equation}
-    df = \nabla f \cdot d\mathbf{x} \rightarrow 
-    \int df = \int \nabla f \cdot d\mathbf{x} = f + c
-\end{equation}
+df = \nabla f \cdot d\mathbf{x} \rightarrow 
+\int df = \int \nabla f \cdot d\mathbf{x} = f + c
 $$
 
 Partiendo de la ecuación de Euler y reemplazando el campo de velocidades por su expresión en términos de la función potencial, así como el campo gravitatorio por su expresión en términos de la función potencial gravitatoria, y además usando la identidad para el término convectivo, se obtiene la siguiente ecuación:
 
 $$
-\begin{equation}
-    \frac{\partial \nabla \Psi}{\partial t} + 
-    \nabla \Psi \times (\nabla \times \nabla \Psi) + 
-    \frac{1}{2} \nabla |\mathbf{u}|^2 = 
-    - \nabla \phi - \frac{1}{\rho} \nabla p
-\end{equation}
+\frac{\partial \nabla \Psi}{\partial t} + 
+\nabla \Psi \times (\nabla \times \nabla \Psi) + 
+\frac{1}{2} \nabla |\mathbf{u}|^2 = 
+- \nabla \phi - \frac{1}{\rho} \nabla p
 $$
 
 Recordando que el rotacional de un gradiente es cero, se obtiene:
 
 $$
-\begin{equation}
-    \nabla \frac{\partial \Psi}{\partial t} + 
-    \frac{1}{2} \nabla |\mathbf{u}|^2 = 
-    - \nabla \phi - \frac{1}{\rho} \nabla p
-\end{equation}
+\nabla \frac{\partial \Psi}{\partial t} + 
+\frac{1}{2} \nabla |\mathbf{u}|^2 = 
+- \nabla \phi - \frac{1}{\rho} \nabla p
 $$
 
 Luego aplicando la definición sobre la integral total, se obtiene:
 
 $$
-\begin{equation}
-    \int \nabla \left( \frac{\partial \Psi}{\partial t} + 
-    \frac{1}{2} |\mathbf{u}|^2 \right) \cdot d\mathbf{x} = 
-    - \int \nabla \phi \cdot d\mathbf{x} 
-    - \frac{1}{\rho} \int \nabla p \cdot d\mathbf{x}
-\end{equation}
+\int \nabla \left( \frac{\partial \Psi}{\partial t} + 
+\frac{1}{2} |\mathbf{u}|^2 \right) \cdot d\mathbf{x} = 
+- \int \nabla \phi \cdot d\mathbf{x} 
+- \frac{1}{\rho} \int \nabla p \cdot d\mathbf{x}
 $$
 
 donde al integral en la variable espacial, la constante resultante es dependiente del tiempo. La ecuación resultante se expresa como:
 
 $$
-\begin{equation}
-    \frac{\partial \Psi}{\partial t} + 
-    \frac{1}{2} |\mathbf{u}|^2 + 
-    \phi + \dfrac{p - p_0}{\rho} + C(t) = 0
-\end{equation}
+\frac{\partial \Psi}{\partial t} + 
+\frac{1}{2} |\mathbf{u}|^2 + 
+\phi + \dfrac{p - p_0}{\rho} + C(t) = 0
 $$
 
 Sea un canal rectangular de ancho infinito, donde se desprecian los cambios en la dirección $y$, con una superficie libre inicialmente horizontal. A dicha altura se tiene la coordenada $z = 0$. El lecho del canal se encuentra en $z = -h$. La deformación de la superficie libre se describe como:
 
-$$
-\begin{equation}
-    \eta = \eta(x, t)\,
-\end{equation}
-$$
+$$ \eta = \eta(x, t) $$
 
 En la superficie libre tenemos $z = \eta(x, t)$, con $\phi = g\,\eta$, la ecuación de Euler resulta:
 
 $$
-\begin{equation}
-    \frac{\partial \Psi}{\partial t} + 
-    \frac{1}{2} |\mathbf{u}|^2 + g\,\eta + 
-    \frac{p - p_0}{\rho} + C(t) = 0
-\end{equation}
+\frac{\partial \Psi}{\partial t} + 
+\frac{1}{2} |\mathbf{u}|^2 + g\,\eta + 
+\frac{p - p_0}{\rho} + C(t) = 0
 $$
 
 donde $g=9.81\,\text{m/s}^2$ es la aceleración de la gravedad y el campo de velocidades $\mathbf{u} = u_x \mathbf{e}_x + u_z \mathbf{e}_z$, cuya norma cuadrática es $|\mathbf{u}|^2 = u_x^2 + u_z^2$. En $z=\eta$ la presión es la atmosférica $p_0$. Además, dado que se procederá a derivar respecto a $x$ podremos eliminar el término $C(t)$ por ser independiente de $x$. Por lo tanto la ecuación de la condición de borde en la superficie libre resulta:
 
 $$
-\begin{equation}
-    \frac{\partial \Psi}{\partial t} + 
-    \frac{1}{2} |\mathbf{u}|^2 + g\,\eta = 0
-\end{equation}
+\frac{\partial \Psi}{\partial t} + 
+\frac{1}{2} |\mathbf{u}|^2 + g\,\eta = 0
 $$
 
 Recordando que que $z=\eta$ en la superficie libre, entonces $\eta - z = 0$. Tomando la derivada material de la ecuación anterior, se obtiene:
 
-$$
-\begin{equation}
-    \frac{D}{Dt} (\eta - z) = 0 \rightarrow \frac{D\eta}{Dt} = \frac{Dz}{Dt}
-\end{equation}
-$$
+$$ \frac{D}{Dt} (\eta - z) = 0 \rightarrow \frac{D\eta}{Dt} = \frac{Dz}{Dt} $$
 
 Teniendo en cuenta que la derivada material es:
 
-$$
-\begin{equation}
-    \frac{D}{Dt} = \frac{\partial}{\partial t} + \mathbf{u} \cdot \nabla
-\end{equation}
-$$
+$$ \frac{D}{Dt} = \frac{\partial}{\partial t} + \mathbf{u} \cdot \nabla $$
 
 y que $\eta = \eta(x, t)$, entonces la ecuación cinemática para la condición de borde resulta:
 
-$$
-\begin{equation}
-    \frac{\partial \eta}{\partial t} + 
-    u_x \frac{\partial \eta}{\partial x} - u_z = 0
-\end{equation}
-$$
+$$ \frac{\partial \eta}{\partial t} + u_x \frac{\partial \eta}{\partial x} - u_z = 0 $$
 
 ## Aproximación de Boussinesq
 El potencial de velocidad $\Psi$ se puede expresar como:
 
-$$
-\begin{equation}
-    \Psi = \Psi(x, z, t)
-\end{equation}
-$$
+$$ \Psi = \Psi(x, z, t) $$
 
 y desarrollando en serie de Taylor alrededor de $z=-h$ se obtiene:
 
-$$
-\begin{equation}
-    \Psi = \Psi\big|_{z=-h} + 
-    (z+h) \frac{\partial \Psi}{\partial z} \bigg|_{z=-h} +
-    \frac{(z+h)^2}{2} \frac{\partial^2 \Psi}{\partial z^2} \bigg|_{z=-h} + \cdots
-\end{equation}
+$$ 
+\Psi = \Psi\big|_{z=-h} + (z+h) \frac{\partial \Psi}{\partial z} \bigg|_{z=-h} +
+\frac{(z+h)^2}{2} \frac{\partial^2 \Psi}{\partial z^2} \bigg|_{z=-h} + \cdots
 $$
 
 Como el fluido es incompresible, entonces $\nabla \cdot \mathbf{u} = 0$, por lo tanto $\nabla \cdot \nabla \Psi = \Delta \Psi = 0$, es decir, $\Psi$ es armónica, lo cual se expresa como:
 
-$$
-\begin{equation}
-    \frac{\partial^2 \Psi}{\partial x^2} + 
-    \frac{\partial^2 \Psi}{\partial z^2} = 0
-\end{equation}
-$$
+$$ \frac{\partial^2 \Psi}{\partial x^2} + \frac{\partial^2 \Psi}{\partial z^2} = 0 $$
 
 Luego para el bilaplaciano ocurre algo similar:
 
-$$
-\begin{equation}
-    \Delta^2 \Psi = 
-    \frac{\partial^4 \Psi}{\partial x^4} + 
-    2 \frac{\partial^4 \Psi}{\partial x^2 \partial z^2} + 
-    \frac{\partial^4 \Psi}{\partial z^4} = 0
-\end{equation}
+$$ 
+\Delta^2 \Psi = \frac{\partial^4 \Psi}{\partial x^4} + 
+2 \frac{\partial^4 \Psi}{\partial x^2 \partial z^2} + 
+\frac{\partial^4 \Psi}{\partial z^4} = 0
 $$
 
 y utilizando la relación entre las derivadas segundas de la ecuación de Laplace, se obtiene:
 
-$$
-\begin{equation}
-    \frac{\partial^4 \Psi}{\partial z^4} - 
-    \frac{\partial^4 \Psi}{\partial x^4} = 0
-\end{equation}
-$$
+$$ \frac{\partial^4 \Psi}{\partial z^4} - \frac{\partial^4 \Psi}{\partial x^4} = 0 $$
 
 Podriamos continuar aplicando el laplaciano sobre la ecuación anterior y obtener relaciones para las derivadas de alto orden, pero para simplificar el problema, se asume que las derivadas de alto orden son despreciables. Veamos entonces como queda el desarrollo de Taylor para el potencial de velocidad hasta el cuarto orden:
 
 $$
-\begin{align}
-    \Psi =& \quad \Psi\big|_{z=-h} + 
-    (z+h) \frac{\partial \Psi}{\partial z} \bigg|_{z=-h} +
-    \frac{(z+h)^2}{2} \frac{\partial^2 \Psi}{\partial z^2} \bigg|_{z=-h} + \ldots \notag\\  
-    & \ldots \frac{(z+h)^3}{6} \frac{\partial^3 \Psi}{\partial z^3} \bigg|_{z=-h} +
-    \frac{(z+h)^4}{24} \frac{\partial^4 \Psi}{\partial z^4} \bigg|_{z=-h} + \cdots
-\end{align}
+\Psi = \Psi\big|_{z=-h} + (z+h) \frac{\partial \Psi}{\partial z} \bigg|_{z=-h} +
+\frac{(z+h)^2}{2} \frac{\partial^2 \Psi}{\partial z^2} \bigg|_{z=-h} + \ldots \notag\\  
+\ldots \frac{(z+h)^3}{6} \frac{\partial^3 \Psi}{\partial z^3} \bigg|_{z=-h} +
+\frac{(z+h)^4}{24} \frac{\partial^4 \Psi}{\partial z^4} \bigg|_{z=-h} + \cdots
 $$
 
 Utilizando las relaciones encontradas para las derivadas parciales de $\Psi$ del laplaciano y bilaplaciano, se obtiene:
