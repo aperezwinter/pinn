@@ -2,27 +2,18 @@
 
 ## Introducción
 La teoría de ondas de Boussinesq es una aproximación para describir las ondas de gravedad en aguas poco profundas. Sea un fluido incompresible y no viscoso, con una superficie libre. Se describe el campo de velocidades y la presión en el fluido mediante la ecuación de Euler y la ecuación de continuidad:
-
 $$
-\begin{equation}
-    \frac{\partial \mathbf{u}}{\partial t} + 
-    (\mathbf{u} \cdot \nabla) \mathbf{u} = 
-    \mathbf{g} - \dfrac{1}{\rho} \nabla p
-\end{equation}
+\frac{\partial \mathbf{u}}{\partial t} + 
+(\mathbf{u} \cdot \nabla) \mathbf{u} = 
+\mathbf{g} - \dfrac{1}{\rho} \nabla p
 $$
 
-$$
-\begin{equation}
-    \nabla \cdot \mathbf{u} = 0
-\end{equation}
-$$
+$$ \nabla \cdot \mathbf{u} = 0 $$
 
 En notación indicial, las ecuaciones anteriores se escriben como:
 
 $$
-\begin{equation}
-    \frac{\partial u_i}{\partial t} + u_j \frac{\partial u_i}{\partial x_j} = g_i - \frac{1}{\rho} \frac{\partial p}{\partial x_i}
-\end{equation}
+\frac{\partial u_i}{\partial t} + u_j \frac{\partial u_i}{\partial x_j} = g_i - \frac{1}{\rho} \frac{\partial p}{\partial x_i}
 $$
 
 $$
