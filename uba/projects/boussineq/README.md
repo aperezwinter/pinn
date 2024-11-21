@@ -45,7 +45,7 @@ Vamos a usar una función potencial $\Psi$ para describir el campo de velocidade
 
 $$
 \begin{equation}
-    \mathbf{u} = \nabla \Psi\,, \quad \mathbf{g} = - \nabla \phi\,.
+    \mathbf{u} = \nabla \Psi\, \quad \mathbf{g} = - \nabla \phi\,.
 \end{equation}
 $$
 
@@ -104,7 +104,7 @@ Sea un canal rectangular de ancho infinito, donde se desprecian los cambios en l
 
 $$
 \begin{equation}
-    \eta = \eta(x, t)\,,
+    \eta = \eta(x, t)\,
 \end{equation}
 $$
 
@@ -239,15 +239,10 @@ $$
 donde hemos introducido la notación para la derivada parcial respecto a $x_i$ como $f_{,i}$. Esta aproximación de Taylor es válida para un fluido no viscoso e incompresible de forma exacta, ya que no hemos truncado la serie de Taylor. Cuando se trunca la misma a un número finito de términos, se obtiene la aproximación de Boussinesq. En consecuencia, podemos resolver lo que ocurre en la superficie libre, a partir de lo que ocurre en el fondo del canal. Por esta razón es que este análisis es válido para aguas poco profundas. Dado que tengo una expresión analítica para $\Psi(x,t)$, puedo derivar expresiones analíticas para el campo de velocidades. Sea $f(x,t) := u_x(x,-h,t) = \Psi_{,x}(x,-h,t)$, entonces:
 
 $$
-\begin{equation}
-    u_x = \Psi_{,x} = f - \frac{(z+h)^2}{2} f_{,xx} + \frac{(z+h)^4}{24} f_{,xxxx} \ldots
-\end{equation}
-$$
-
-$$
-\begin{equation}
-    u_z = \Psi_{,z} = - (z+h) f_{,x} + \frac{(z+h)^3}{6} f_{,xxx} \ldots
-\end{equation}
+\begin{align}
+    u_x =& \Psi_{,x} = f - \frac{(z+h)^2}{2} f_{,xx} + \frac{(z+h)^4}{24} f_{,xxxx} - \ldots \\
+    u_z =& \Psi_{,z} = - (z+h) f_{,x} + \frac{(z+h)^3}{6} f_{,xxx} -\ldots
+\end{align}
 $$
 
 por lo que hemos encontrado expresiones analíticas para el campo de velocidades en todo el canal en función de lo que ocurre en el fondo. Reemplazando los campos de velocidades en la ecuación cinemática de la condición de borde, se obtiene:
@@ -263,31 +258,26 @@ Ahora se debe reemplazar las expresiones para $u_x y $u_z$ en la ecuación de la
 
 $$
 \begin{align}
-    \frac{\partial u_x}{\partial t} + \frac{1}{2} \left( u_x^2 + u_z^2 \right)_{,x} + g\,\eta_{,x} = 0\,, \quad \Psi_{,x} = u_x
+    \frac{\partial u_x}{\partial t} + \frac{1}{2} \left( u_x^2 + u_z^2 \right)_{,x} + g\,\eta_{,x} = 0\, \quad \Psi_{,x} = u_x
 \end{align}
 $$
 
 Los términos cuadráticos del campo de velocidades se pueden expresar como:
 
 $$
-\begin{equation}
-    u_x^2 = f^2 - (\eta+h)^2 f f_{,xx} + \frac{(\eta+h)^4}{4} f_{,xx}^2 + 
-    \frac{(\eta+h)^4}{12} f f_{,xxxx} + \ldots
-\end{equation}
-$$
-
-$$
-\begin{equation}
-    u_z^2 = (\eta+h)^2 f_{,x}^2 - \frac{(\eta+h)^4}{3} f_{,x} f_{,xxx} 
+\begin{align}
+    u_x^2 =& f^2 - (\eta+h)^2 f f_{,xx} + \frac{(\eta+h)^4}{4} f_{,xx}^2 + 
+    \frac{(\eta+h)^4}{12} f f_{,xxxx} + \ldots \\
+    u_z^2 =& (\eta+h)^2 f_{,x}^2 - \frac{(\eta+h)^4}{3} f_{,x} f_{,xxx} 
     + \frac{(\eta+h)^6}{36} f_{,xxx}^2 + \ldots
-\end{equation}
+\end{align}
 $$
 
 por lo tanto la suma de ambos resulta en:
 
 $$
 \begin{align}
-    u_x^2 + u_z^2 = &\, f^2 + (\eta+h)^2 \left( f_{,x}^2 - f f_{,xx} \right) + \ldots \notag\\
+    u_x^2 + u_z^2 =& f^2 + (\eta+h)^2 \left( f_{,x}^2 - f f_{,xx} \right) + \ldots \notag\\
     & + (\eta+h)^4 \left( \frac{f_{,xx}^2}{4} - \frac{f_{,x} f_{,xxx}}{3} + \frac{f f_{,xxxx}}{12} \right) + \ldots \notag\\ & + \frac{(\eta+h)^6}{36} f_{,xxx}^2 + \ldots
 \end{align}
 $$
@@ -296,7 +286,7 @@ Reemplazando estas expresiones en la ecuación de la condición de borde en la s
 
 $$
 \begin{align}
-    0 = &\, \frac{\partial }{\partial t}\left( f - \frac{(\eta+h)^2}{2} f_{,xx} + \ldots \right) + \ldots \notag\\
+    0 =& \frac{\partial }{\partial t}\left( f - \frac{(\eta+h)^2}{2} f_{,xx} + \ldots \right) + \ldots \notag\\
     & \ldots + \frac{1}{2} \frac{\partial }{\partial x} \bigg( f^2 + (\eta+h)^2 \left( f_{,x}^2 - f f_{,xx} \right) + \ldots \bigg) + g \eta_{,x} + \ldots
 \end{align}
 $$
@@ -324,7 +314,7 @@ es decir, que la escala relativa entre la perturbación y el canal es mucho mayo
 
 $$
 \begin{equation}
-    t \sim \tau\,, \quad x \sim \lambda\,, \quad \eta \sim a\,, \quad f \sim f_0\,, 
+    t \sim \tau\, \quad x \sim \lambda\, \quad \eta \sim a\, \quad f \sim f_0\, 
 \end{equation}
 $$
 
@@ -332,9 +322,9 @@ y las derivadas espaciales como:
 
 $$
 \begin{equation}
-    \eta_{,t} \sim \frac{a\,u_0}{\lambda}\,, \quad \eta_{,x} \sim \frac{a}{\lambda}\,, 
-    \quad f_{,x} \sim \frac{f_0}{\lambda}\,, 
-    \quad f_{,xx} \sim \frac{f_0}{\lambda^2}\,, \quad \eta_{,xx} \sim \frac{a}{\lambda^2}
+    \eta_{,t} \sim \frac{a\,u_0}{\lambda}\, \quad \eta_{,x} \sim \frac{a}{\lambda}\, 
+    \quad f_{,x} \sim \frac{f_0}{\lambda}\, 
+    \quad f_{,xx} \sim \frac{f_0}{\lambda^2}\, \quad \eta_{,xx} \sim \frac{a}{\lambda^2}
 \end{equation}
 $$
 
@@ -353,59 +343,76 @@ Estas son las ecuaciones de Boussinesq para ondas no lineales en aguas poco prof
 
 ## Aproximación de 1 ecuación
 Se desea contar con una sola ecuación diferencial para la altura de la superficie libre. El problema principal radica en que la no linealidad es tan fuerte que no resulta trivial la eliminación de $f(x,t)$. Para ello, Boussinesq propuso una aproximación en la que se desprecian los términos de mayor orden, y así hallar una relación de bajo de orden entre $\eta$ y $f$. Si en la sección anterior, durante la simplificación de los términos, aquellos que van como $a/\lambda$ se consideran los de mayor orden, entonces se llega al siguiente sistema de ecuaciones:
+
 $$
 \begin{align}
     & \eta_{,t} + h f_{,x} = 0 \\
     & f_{,t} + g \eta_{,x} = 0
 \end{align}
 $$
+
 el cual, derivando la primera ecuación con respecto a $t$ y la segunda con respecto a $x$, se obtiene:
+
 $$
 \begin{equation}
     \eta_{,tt} + g\,h\,\eta_{,xx} = 0
 \end{equation}
 $$
+
 la cual no es más que la ecuación de ondas clásica, cuya velocidad de propagación es $c = \sqrt{g\,h}$. Esta ecuación tiene una solución bien conocida de un movimiento arbitrario hacia adelante $\eta_+$ y hacia atrás $\eta_-$:
+
 $$
 \begin{equation}
     \eta(x,t) = \eta_+(x-c\,t) + \eta_-(x+c\,t)
 \end{equation}
 $$
+
 Además la ecuación de onda puede ser factorizada como:
+
 $$
 \begin{equation}
-    \left( \frac{\partial}{\partial t} + c \frac{\partial}{\partial x} \right) \left( \frac{\partial}{\partial t} - c \frac{\partial}{\partial x} \right) \eta = 0\,, \quad c = \sqrt{g\,h}
+    \left( \frac{\partial}{\partial t} + c \frac{\partial}{\partial x} \right) \left( \frac{\partial}{\partial t} - c \frac{\partial}{\partial x} \right) \eta = 0\, \quad c = \sqrt{g\,h}
 \end{equation}
 $$
+
 de donde se desprende, por ejemplo, que:
+
 $$
 \begin{equation}
     \eta_{,t} = -\sqrt{gh}\,\eta_{,x}
 \end{equation}
 $$
+
 y haciendo uso del analisis de escalas características, se obtiene la relación entre $f$ y $\eta$:
+
 $$
 \begin{equation}
     f = \sqrt{\frac{g}{h}}\,\eta + \text{cte}
 \end{equation}
 $$
+
 Teniendo en cuneta que dicha expresión para $f$ será reemplazada en el sistema de 2 ecuaciones y que solo parecen derivadas de $f$, la constante de integración se desprecia. Primero se reemplaza a $f$ por su expresión en todos los términos de ambas ecuaciones, luego se deriva la primera ecuación con respecto a $t$ y la segunda con respecto a $x$, se restan ambas ecuaciones y se obtiene:
+
 $$
 \begin{equation}
     \eta_{,tt} - gh\,\eta_{,xx} - gh\,\frac{\partial^2}{\partial x^2} \left( 
         \frac{3}{2}\frac{\eta^2}{h} - \frac{h^2}{3} \eta_{,xx} \right) = 0
 \end{equation}
 $$
+
 la cual se conoce como ecuación de Boussinesq para la altura de la superficie libre. Vale aclarar que hemos llegado a esta ecuación bajo la idea de que la onda solo se transporta, osea no se deforma. ¿Qué sucede si la solución en realidad si se deforma un poco? En realidad, este fenómeno tiene sentido ya que es producto de los dos últimos términos los cuales son de menor efecto frente a los dos primeros (mediante analisis de caracterisitcas de escala).
 
 ## Adimensionalización
 Tomando los siguientes parámetros de referencia:
+
 $$
 \begin{align}
-    \eta^* = 2h\,, \quad t^* = \sqrt{\frac{h}{3g}}\,, \quad x^* = \frac{h}{\sqrt{3}}
+    \eta^* = 2h\, \quad t^* = \sqrt{\frac{h}{3g}}\, \quad x^* = \frac{h}{\sqrt{3}}
 \end{align}
 $$
+
 la ecuación de Boussinesq, adimensionalizada, para la altura de la superficie libre resulta:
+
 $$
 \begin{equation}
     \tilde{\eta}_{,tt} - \tilde{\eta}_{,xx} - \tilde{\eta}_{,xx} \left( 3\tilde{\eta}^2 + \tilde{\eta}_{,xx} \right) = 0
@@ -414,15 +421,19 @@ $$
 
 ## Condiciones de borde
 Como hemos visto, se tiene un problema de propagación de ondas, por lo tanto se propone que no haya ondas entrantes al dominio. Ergo, utilizando la factorización de la ecuación de propagación, podemos escribir para el borde derecho:
+
 $$
 \begin{equation}
     \frac{\partial \tilde{\eta}}{\partial \tilde{t}}\bigg|_{\tilde{x}=b} = -\frac{\partial \tilde{\eta}}{\partial \tilde{x}}\bigg|_{\tilde{x}=b}
 \end{equation}
 $$
+
 y para el borde izquierdo:
+
 $$
 \begin{equation}
     \frac{\partial \tilde{\eta}}{\partial \tilde{t}}\bigg|_{\tilde{x}=a} = \frac{\partial \tilde{\eta}}{\partial \tilde{x}}\bigg|_{\tilde{x}=a}
 \end{equation}
 $$
+
 donde $a$ y $b$ son las coordenadas del borde izquierdo y derecho, respectivamente.
