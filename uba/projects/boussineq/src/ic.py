@@ -1,7 +1,7 @@
 import torch
 import numpy as np
-from pyDOE import lhs
 import pytorch_lightning as pl
+from pyDOE import lhs
 from torch.utils.data import DataLoader, Dataset
 
 if torch.backends.mps.is_available():
