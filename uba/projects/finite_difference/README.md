@@ -4,7 +4,7 @@
 
 *Facultad de Ingeniería de la Universidad de Buenos Aires*  
 
-*David Canal, Alán Pérez Winter*
+*David Canal, Alan Pérez Winter*
 
 *Diciembre 2024*
 
@@ -283,9 +283,73 @@ A priori, se observa una relación entre el número de capas intermedias con el 
 
 A medida que se añaden más capas y neuronas, como en las configuraciones de 3 o más capas, la red gana capacidad para modelar patrones más complejos. Este diseño es especialmente efectivo en grillas intermedias y grandes, donde se requiere un equilibrio entre la capacidad de modelado y la eficiencia computacional. No obstante, en casos de grillas grandes (\(20 X 20\)), las redes excesivamente profundas pueden llevar a problemas de sobreajuste, especialmente si no se implementan técnicas adecuadas de regularización.
 
+# **Parte 2**
+---
+# **(a). Resolución mediante Diferencias Finitas**
+La ecuación diferencia del Poisson con su fuente no lineal, descripta al inicio en la consigna, es resuelta en tres tamaños de grillas: $5\times5$, $10\times10$ y $20\times20$. A continuación se muestran tres figuras, una para cada densidad de grilla, donde se grafican los puntos de discretización. A su vez, los mismos cumplen con el propósito de ser los puntos de colocación para el entrenamiento de la red neuronal.
+
+![image](figures/col_pts_5x5.png)
+![image](figures/col_pts_10x10.png)
+![image](figures/col_pts_20x20.png)
+
+En las siguientes figuras se muestra la resolución de la ecuación de Poisson con fuente no lineal, por el método de diferencias finitas. En ellas se observa, la superficie tridimensional $u(x,y)$ así como también las curvas de nivel de la misma sobre el plano $(x,y)$. La resolución numérica se llevó a cabo para los tres tamaños de grilla. Como variable principal, en base a los resultaods, se observa una mejora sustancial en la suavidad o resolución de la solución a medida que aumenta el número de puntos de grilla.
+
+<img src="figures/fdm_sol_5x5.png" width="300">
+<img src="figures/fdm_sol_10x10.png" width="300">
+<img src="figures/fdm_sol_20x20.png" width="300">
+
+---
+# **(b). Resolución mediante Redes Neuronales**
+Se resolvió la ecuación de Poisson con fuente no lineal, mediante el método de redes neuronales. En este caso se uso un modelo *Vanilla PINN*. En todos los casos se utilizó la siguiente arquitectura de red junto con los hiperparámetros:
+- Neuronas de entrada: 2 (variables $x$ e $y$)
+- Neuronas de salida: 1 (función escalar $u$)
+- Número de capas ocultas: 2
+- Número de neuronas ocultas: 5 (igual para todas las capas)
+- Optimizador: Adam
+- Sin regularización
+- Épocas: 5000
+- Tasa de aprendizaje: $1e-4$
+
+En la capa de salida no se utiliza una función de activación, se deja libre, es decir una capa lineal. Para las capas ocultas, se pruba el modelo para tres funciones de activación distintas:
+- Tangente hiperbólica: Tanh
+- Lineal rectificada: ReLU
+- Función sigmoide: Sigmoid
+
+## **(b.1). Grilla $5\times5$**
+<img src="figures/loss_nlp_vanilla_tanh_5x5.png" width="400">
+<img src="figures/loss_nlp_vanilla_relu_5x5.png" width="400">
+<img src="figures/loss_nlp_vanilla_sigmoid_5x5.png" width="400">
+
+## **(b.2). Grilla $10\times10$**
+<img src="figures/loss_nlp_vanilla_tanh_10x10.png" width="400">
+<img src="figures/loss_nlp_vanilla_relu_10x10.png" width="400">
+<img src="figures/loss_nlp_vanilla_sigmoid_10x10.png" width="400">
+
+## **(b.3). Grilla $20\times20$**
+<img src="figures/loss_nlp_vanilla_tanh_20x20.png" width="400">
+<img src="figures/loss_nlp_vanilla_relu_20x20.png" width="400">
+<img src="figures/loss_nlp_vanilla_sigmoid_20x20.png" width="400">
 
 
+# **(c). Análisis del Error**
+Eror en norma $L_2$ en los puntos de grilla entre la solución por diferencias finitas y las redes neuronales.
 
+| Activación | Grilla $5\times5$ | Grilla $10\times10$ | Grilla $20\times20$ |
+| ---------- | ----------------- | ------------------- | ------------------- |
+| Tanh       | $0.6944$          | $1.932$             | $0.1091$            |
+| ReLU       | $0.8594$          | $0.9087$            | $0.8372$            |
+| Sigmoid    | $0.489$           | $0.6494$            | $0.5358$            |
+
+_**Tabla**: Valores de error en norma $L_2$. Se calcula sobre los puntos de grilla, siendo este la diferencia entre la solución $u$ en diferencias finitas y redes neuronales._
+
+
+| Activación | Grilla $5\times5$ | Grilla $10\times10$ | Grilla $20\times20$ |
+| ---------- | ----------------- | ------------------- | ------------------- |
+| Tanh       | $0.5496$          | $2.073$             | $0.09276$           |
+| ReLU       | $0.8496$          | $0.9076$            | $0.8319$            |
+| Sigmoid    | $0.4629$          | $0.5946$            | $0.5219$            |
+
+_**Tabla**: Valores de error en norma $L_2$. Se calcula sobre puntos aleatorios del dominio, por fuera de la grilla pero en igual cantidad, siendo este la diferencia entre la solución $u$ en diferencias finitas y redes neuronales._
 
 
 
