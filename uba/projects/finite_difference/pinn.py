@@ -1,4 +1,4 @@
-import time
+import time, json
 import numpy as np
 import matplotlib.pyplot as plt
 from math import pi
@@ -92,6 +92,37 @@ class SupervisedDM(pl.LightningDataModule):
     def getValDataloader(self):
         val_split = Supervised(self.xy_val, self.u_val)
         return DataLoader(val_split, batch_size=self.batch_size)
+
+class SupervisedDataModuleNLP(pl.LightningDataModule):
+    """Supervised DataModule class for NLP, where NLP stands for Non Linear Poisson."""
+
+    def __init__(self, xy_train: np.ndarray, u_train: np.ndarray, 
+                 xy_val: np.ndarray, u_val: np.ndarray, batch_size: int=32):
+        super().__init__()
+        self.n_train = xy_train.shape[0]
+        self.n_val = xy_val.shape[0]
+        self.xy_train = torch.tensor(xy_train, dtype=torch.float32, requires_grad=True)
+        self.xy_val = torch.tensor(xy_val, dtype=torch.float32, requires_grad=True)
+        self.u_train = torch.tensor(u_train, dtype=torch.float32)
+        self.u_val = torch.tensor(u_val, dtype=torch.float32)
+        self.batch_size = batch_size
+    
+    def setup(self, stage: str=None):
+        indices_train = np.random.permutation(self.n_train)
+        indices_val = np.random.permutation(self.n_val)
+        # Random shuffle the data
+        self.xy_train = self.xy_train[indices_train]
+        self.xy_val = self.xy_val[indices_val]
+        self.u_train = self.u_train[indices_train]
+        self.u_val = self.u_val[indices_val]
+    
+    def getTrainDataloader(self):
+        train_split = Supervised(self.xy_train, self.u_train)
+        return DataLoader(train_split, batch_size=self.batch_size, shuffle=True)
+
+    def getValDataloader(self):
+        val_split = Supervised(self.xy_val, self.u_val)
+        return DataLoader(val_split, batch_size=self.batch_size)
     
 class Unsupervised(Dataset):
     def __init__(self, inputs):
@@ -128,6 +159,30 @@ class UnsupervisedDM(pl.LightningDataModule):
         val_split = Unsupervised(self.xy_val)
         return DataLoader(val_split, batch_size=self.batch_size)
 
+class UnsupervisedDataModuleNLP(pl.LightningDataModule):
+    def __init__(self, xy_train: np.ndarray, xy_val: np.ndarray, batch_size: int=32):
+        super().__init__()
+        self.n_train = xy_train.shape[0]
+        self.n_val = xy_val.shape[0]
+        self.xy_train = torch.tensor(xy_train, dtype=torch.float32, requires_grad=True)
+        self.xy_val = torch.tensor(xy_val, dtype=torch.float32, requires_grad=True)
+        self.batch_size = batch_size
+
+    def setup(self, stage: str=None):
+        indices_train = np.random.permutation(self.n_train)
+        indices_val = np.random.permutation(self.n_val)
+        # Random shuffle the data
+        self.xy_train = self.xy_train[indices_train]
+        self.xy_val = self.xy_val[indices_val]
+
+    def getTrainDataloader(self):
+        train_split = Unsupervised(self.xy_train)
+        return DataLoader(train_split, batch_size=self.batch_size, shuffle=True)
+
+    def getValDataloader(self):
+        val_split = Unsupervised(self.xy_val)
+        return DataLoader(val_split, batch_size=self.batch_size)
+
 def getSupervisedDataLoader(getData, n: int=100, batch_size: int=32, **kwargs):
     if getData != getCollocationPoints:
         values = kwargs.get('values', [0, 0, 0, 0])
@@ -154,6 +209,10 @@ def getUnsupervisedDataLoader(getData, n: int=100, batch_size: int=32, **kwargs)
     val_dl = dataset.getValDataloader()
     return (train_dl, val_dl)
 
+class InvReLU(nn.Module):
+    def forward(self, x):
+        return torch.minimum(x, torch.zeros_like(x))
+
 class PoissonPINN(nn.Module):
     def __init__(
             self, 
@@ -168,6 +227,8 @@ class PoissonPINN(nn.Module):
         self.num_layers = len(sizes)
         self.loss_fn = loss_fn
         self.device = device
+        self.lambda_bc = 1.0
+        self.lambda_domain = 1.0
 
         # Define the layers.
         layers = []
@@ -186,7 +247,7 @@ class PoissonPINN(nn.Module):
             'epochs': [], 
             'loss': {
                 'train': {'bc': [], 'domain': [], 'data': [], 'total': []}, 
-                'eval' : {'bc': [], 'domain': [], 'data': [], 'total': []}
+                'val' : {'bc': [], 'domain': [], 'data': [], 'total': []}
             }, 
             'time': 0.0
         }
@@ -235,11 +296,18 @@ class PoissonPINN(nn.Module):
     def size(self):
         return sum(p.numel() for p in self.parameters() if p.requires_grad)
 
-    def save(self, path: str="model_params.pth"):
-        torch.save(self.state_dict(), path)
+    def save(self, model_path: str="model_params.pth", metrics_path: str="metrics.txt"):
+        torch.save(self.state_dict(), model_path)
+        with open(metrics_path, 'w') as f:
+            f.truncate()
+            json.dump(self.metrics, f)
+        f.close()
 
-    def load(self, path: str="model_params.pth"):
-        self.load_state_dict(torch.load(path))
+    def load(self, model_path: str="model_params.pth", metrics_path: str="metrics.txt"):
+        self.load_state_dict(torch.load(model_path, weights_only=True))
+        with open(metrics_path, 'r') as f:
+            self.metrics = json.load(f)
+        f.close()
         self.to(self.device)
 
     def plotLoss(self, figsize=(10, 5), save: bool=False, filename: str="loss.png"):
@@ -285,7 +353,7 @@ class NonLinearPoissonPINN(PoissonPINN):
         return 0.5 * torch.exp(u)
     
     def computeLoss(self, bc_dirichlet_dl, bc_right_dl, bc_top_dl, domain_dl):
-        # Compute dirichlet bc loss
+        # Compute boundary loss
         bc_loss = 0.0
         ## Dirichlet BC
         for xy_batch, u_batch in bc_dirichlet_dl:
@@ -303,16 +371,11 @@ class NonLinearPoissonPINN(PoissonPINN):
 
         # Compute total loss
         total_loss = bc_loss + domain_loss
-
-        # Normalize the losses
-        bc_loss /= len(bc_dirichlet_dl) + len(bc_right_dl) + len(bc_top_dl)
-        domain_loss /= len(domain_dl)
-        total_loss /= len(bc_dirichlet_dl) + len(bc_right_dl) + len(bc_top_dl) + len(domain_dl)
         
         return bc_loss, domain_loss, total_loss
     
     def fit(self, train_dataloader, optimizer=optim.Adam, epochs=30, lr=1e-4, 
-        regularization=0.0, eval_dataloader=None, verbose=True, epch_print=1):
+        regularization=0.0, val_dataloader=None, verbose=True, epoch_print=10):
 
         # Set the starting epoch
         last_epoch = self.metrics['epochs'][-1] if self.metrics['epochs'] else 0
@@ -320,42 +383,36 @@ class NonLinearPoissonPINN(PoissonPINN):
     
         # Get the dataloaders
         dirichlet_train_dl, right_train_dl, top_train_dl, domain_train_dl = train_dataloader
-        dirichlet_eval_dl, right_eval_dl, top_eval_dl, domain_eval_dl = eval_dataloader
+        dirichlet_val_dl, right_val_dl, top_val_dl, domain_val_dl = val_dataloader
         optimizer = optimizer(self.parameters(), lr=lr, weight_decay=regularization)
 
         # Start the training
         start_time = time.time()
         for i in range(epochs):
             self.train()
-            train_loss_bc, train_loss_domain, train_loss = 0.0, 0.0, 0.0
             for dirichlet_batch, right_batch, top_batch, domain_batch in zip(
                 dirichlet_train_dl, right_train_dl, top_train_dl, domain_train_dl):
-                loss_batch = self.trainBatch(dirichlet_batch, right_batch, top_batch, domain_batch, optimizer)
-                train_loss_bc += loss_batch[0]
-                train_loss_domain += loss_batch[1]
-                train_loss += loss_batch[2]
-            train_loss_bc /= len(dirichlet_train_dl) + len(right_train_dl) + len(top_train_dl)
-            train_loss_domain /= len(domain_train_dl)
-            train_loss /= len(dirichlet_train_dl) + len(right_train_dl) + len(top_train_dl) + len(domain_train_dl)
-            
-            # Save training metrics
-            self.metrics['epochs'].append(starting_epoch + i)
-            self.metrics['loss']['train']['bc'].append(train_loss_bc)
-            self.metrics['loss']['train']['domain'].append(train_loss_domain)
-            self.metrics['loss']['train']['total'].append(train_loss)
+                self.trainBatch(dirichlet_batch, right_batch, top_batch, domain_batch, optimizer)
 
             # Evaluate the model
             self.eval()
-            if eval_dataloader:
-                loss_batch = self.computeLoss(dirichlet_eval_dl, right_eval_dl, top_eval_dl, domain_eval_dl)
-                self.metrics['loss']['eval']['bc'].append(loss_batch[0])
-                self.metrics['loss']['eval']['domain'].append(loss_batch[1])
-                self.metrics['loss']['eval']['total'].append(loss_batch[2])
+            self.metrics['epochs'].append(starting_epoch + i)
+            train_loss = self.computeLoss(dirichlet_train_dl, right_train_dl, top_train_dl, domain_train_dl)
+            self.metrics['loss']['train']['bc'].append(train_loss[0])
+            self.metrics['loss']['train']['domain'].append(train_loss[1])
+            self.metrics['loss']['train']['total'].append(train_loss[2])
+            if val_dataloader:
+                val_loss = self.computeLoss(dirichlet_val_dl, right_val_dl, top_val_dl, domain_val_dl)
+                self.metrics['loss']['val']['bc'].append(val_loss[0])
+                self.metrics['loss']['val']['domain'].append(val_loss[1])
+                self.metrics['loss']['val']['total'].append(val_loss[2])
             
             # Print the progress
-            if verbose and (i + 1) % epch_print == 0:
-                eval_loss = loss_batch[2] if eval_dataloader else 'N/A'
-                print(f"Epoch {i+1}/{epochs}: Loss ({train_loss:.4g}, {eval_loss:.4g})")
+            if verbose and (i + 1) % epoch_print == 0:
+                val_loss = val_loss[2] if val_dataloader else 'N/A'
+                text = f"Epoch {starting_epoch + i}/{starting_epoch + epochs}: "
+                text += f"Loss ({train_loss[2]:.4g}, {val_loss:.4g})"
+                print(text)
 
         self.metrics['time'] += time.time() - start_time
 
@@ -397,11 +454,6 @@ class LinearPoissonPINN(PoissonPINN):
 
         # Compute total loss
         total_loss = bc_loss + domain_loss
-
-        # Normalize the losses
-        bc_loss /= len(bc_dirichlet_dl)
-        domain_loss /= len(domain_dl)
-        total_loss /= len(bc_dirichlet_dl) + len(domain_dl)
         
         return bc_loss, domain_loss, total_loss
     

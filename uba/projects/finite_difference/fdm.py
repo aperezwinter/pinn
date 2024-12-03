@@ -3,250 +3,360 @@ import matplotlib.pyplot as plt
 from math import pi
 from scipy.sparse import diags
 from scipy.sparse.linalg import spsolve
+from scipy.interpolate import griddata
+from fipy.tools import numerix
+from fipy import CellVariable, Grid2D, DiffusionTerm, Viewer
 
-class Mesh(object):
-    def __init__(self, a: float=1.0, b: float=1.0, nx: int=10, ny: int=10):
-        self.a = a
-        self.b = b
+
+class Domain(object):
+
+    def __init__(self, Lx: float=1.0, Ly: float=1.0, nx: int=20, ny: int=20) -> None:
+        self.Lx = Lx
+        self.Ly = Ly
         self.nx = nx
         self.ny = ny
-        self.hx = a / nx
-        self.hy = b / ny
-        self.x = np.linspace(0, a, nx + 1)
-        self.y = np.linspace(0, b, ny + 1)
-    
-    def __getitem__(self, indices):
-        """Allows access to mesh points using mesh[i, j] syntax."""
-        i, j = indices
-        return self.x[i], self.y[j]
+        self.dx = Lx / nx
+        self.dy = Ly / ny
+        self.mesh = Grid2D(dx=self.dx, dy=self.dy, nx=nx, ny=ny)
 
-    def size(self):
-        """Returns the total size of the mesh."""
+    def getBoundsCoords(self):
+        left = self.mesh.faceCenters[:, self.mesh.facesLeft]
+        right = self.mesh.faceCenters[:, self.mesh.facesRight]
+        top = self.mesh.faceCenters[:, self.mesh.facesTop]
+        bottom = self.mesh.faceCenters[:, self.mesh.facesBottom]
+        coords = np.hstack([left, right, top, bottom]).T
+        return coords
+
+    def getLeftBoundCoords(self):
+        coords = self.mesh.faceCenters[:, self.mesh.facesLeft]
+        coords = np.hstack([coords])
+        return coords
+    
+    def getRightBoundCoords(self):
+        coords = self.mesh.faceCenters[:, self.mesh.facesRight]
+        coords = np.hstack([coords])
+        return coords
+    
+    def getTopBoundCoords(self):
+        coords = self.mesh.faceCenters[:, self.mesh.facesTop]
+        coords = np.hstack([coords])
+        return coords
+    
+    def getBottomBoundCoords(self):
+        coords = self.mesh.faceCenters[:, self.mesh.facesBottom]
+        coords = np.hstack([coords])
+        return coords
+    
+    def getDomainCoords(self):
+        return self.mesh.cellCenters.value.T
+    
+    def getCoords(self):
+        bounds = self.getBoundsCoords()
+        domain = self.getDomainCoords()
+        return np.vstack([bounds, domain])
+    
+    def getNumberOfPoints(self):
         return (self.nx + 1) * (self.ny + 1)
-
-class LinearPoissonFDM(object):
-    def __init__(
-            self, 
-            a: float=1.0, 
-            b: float=1.0, 
-            nx: int=10, 
-            ny: int=10, 
-    ):
-        self.mesh = Mesh(a, b, nx, ny)
-        self.u = np.zeros((self.mesh.nx + 1, self.mesh.ny + 1))
     
-    def __getitem__(self, indices):
-        """Allows access to solution points using [i, j] syntax."""
-        return self.u[indices]
-    
-    def exact(self, x, y):
-        """Exact solution."""
-        return - np.sin(np.pi * x) * np.sin(np.pi * y) / (2 * np.pi**2)
+    def getNumberOfCells(self):
+        return self.nx * self.ny
 
-    def error(self, norm: str='l2'):
-        """Computes the error between the exact and numerical solutions."""
-        u_exact = self.exact(self.mesh.x[:, None], self.mesh.y[None, :])
-        error = (self.u - u_exact)
-        if norm == 'l2':
-            return np.linalg.norm(error, 2) / np.linalg.norm(u_exact, 2)
-        elif norm == 'l1':
-            return np.linalg.norm(error, 1) / np.linalg.norm(u_exact, 1)
-        elif norm == 'max':
-            return np.max(np.abs(error)) / np.max(np.abs(u_exact))
+
+class LinearPoisson(object):
+
+    def __init__(self, Lx: float=1.0, Ly: float=1.0, nx: int=20, ny: int=20) -> None:
+        self.domain = Domain(Lx, Ly, nx, ny)
+        self.k = 1
+        self.u = CellVariable(mesh=self.domain.mesh, name="u")
+    
+    def computeErrorL2(self, values: np.ndarray=None):
+        u_num = self.getSolution()
+        if values:
+            values_norm = np.linalg.norm(values, 2)
+            error = np.linalg.norm(values - u_num) / values_norm
+        else: 
+            u_exact = self.getExactSolution()
+            u_exact_norm = np.linalg.norm(u_exact, 2)
+            error = np.linalg.norm(u_exact - u_num) / u_exact_norm
+        return error
+    
+    def computeErrorL2InPoints(self, points: np.ndarray, method: str, values: np.ndarray=None):
+        u_interpolated = self.interpolate(points, method)
+        if values:
+            values_norm = np.linalg.norm(values, 2)
+            error = np.linalg.norm(u_interpolated - values) / values_norm
         else:
-            raise ValueError(f"Invalid norm: {norm} is not supported.")
+            u_exact = self.computeExactSolution(points[:, 0], points[:, 1])
+            u_exact_norm = np.linalg.norm(u_exact, 2)
+            error = np.linalg.norm(u_exact - u_interpolated) / u_exact_norm
+        return error
+
+    def computeExactSolution(self, x, y):
+        return - np.sin(pi * x) * np.sin(pi * y) / (2 * pi**2)
+    
+    def computeNormL2(self):
+        u_num = self.getSolution()
+        return np.linalg.norm(u_num)
+    
+    def computeNormL2InPoints(self, points: np.ndarray, method: str):
+        u_interpolated = self.interpolate(points, method)
+        return np.linalg.norm(u_interpolated)
+
+    def getExactSolution(self):
+        coords = self.domain.getCoords()
+        x, y = coords[:, 0], coords[:, 1]
+        u = self.computeExactSolution(x, y)
+        return u
+    
+    def getSolution(self):
+        u_bound = self.getSolutionInBoundary()
+        u_values = np.hstack([u_bound, self.u.value])
+        return u_values
+    
+    def getSolutionInBoundary(self):
+        u_left = self.u.arithmeticFaceValue[self.domain.mesh.facesLeft]
+        u_right = self.u.arithmeticFaceValue[self.domain.mesh.facesRight]
+        u_top = self.u.arithmeticFaceValue[self.domain.mesh.facesTop]
+        u_bottom = self.u.arithmeticFaceValue[self.domain.mesh.facesBottom]
+        return np.hstack([u_left, u_right, u_top, u_bottom])
+    
+    def interpolate(self, points: np.ndarray, method: str="linear"):
+        assert method in ["linear", "nearest", "cubic"], f"{method} interpolation's method not allowed."
+        coords = self.domain.getCoords()
+        u_bound = self.getSolutionInBoundary()
+        u_values = np.hstack([u_bound, self.u.value])
+        u_interp_values = griddata(points=coords, values=u_values, xi=points, 
+                                   method=method, fill_value=0.0)
+        return u_interp_values
+    
+    def plotSolution(self, figsize=(6, 4), save: bool=False, 
+                     filename: str="nonlinear_solution.png", 
+                     title: str="Linear Poisson - Grid"):
+        # Sample data
+        r = self.domain.getCoords()
+        x, y = r[:,0], r[:,1]
+        u = self.getSolution()
+
+        fig = plt.figure()
+        ax = fig.add_subplot(projection='3d')
+        
+        # 3D surface plot
+        min_u, max_u = u.min(), u.max()
+        levels = np.linspace(min_u, max_u, 10)
+        ax.plot_trisurf(x, y, u, cmap='viridis', antialiased=False, edgecolor='none')
+        ax.tricontour(x, y, u, levels=levels, linewidths = 1, colors="black", offset=min_u)
+        ax.tricontourf(x, y, u, levels=levels, cmap='viridis', offset=min_u, alpha=0.75)
+        
+        # Z-axis limits
+        ax.set_zlim(min_u, max_u)
+        ax.set_box_aspect(None, zoom=0.8)
+
+        # Axis labels
+        ax.set_xlabel(r'$x$', labelpad=5)
+        ax.set_ylabel(r'$y$', labelpad=5)
+        ax.set_zlabel(r'$u$', labelpad=10)
+
+        plt.tight_layout()
+        plt.title(title)
+        
+        # Save
+        if save:
+            plt.savefig(filename, dpi=200, facecolor='w', edgecolor='w')
+            plt.close()
+        else:
+            plt.show()
+
+    def plotSolutionInPoints(self, points: np.ndarray, method: str="linear", figsize=(8, 5), 
+                             save: bool=False, filename: str='nonlinear_solution.png', 
+                             title: str="Linear Poisson - Interpolated"):
+        # Sample data
+        x, y = points[:, 0], points[:, 1]
+        u = self.interpolate(points, method)
+
+        fig = plt.figure()
+        ax = fig.add_subplot(projection='3d')
+        
+        # 3D surface plot
+        min_u, max_u = u.min(), u.max()
+        levels = np.linspace(min_u, max_u, 10)
+        ax.plot_trisurf(x, y, u, cmap='viridis', antialiased=False, edgecolor='none')
+        ax.tricontour(x, y, u, levels=levels, linewidths = 1, colors="black", offset=min_u)
+        ax.tricontourf(x, y, u, levels=levels, cmap='viridis', offset=min_u, alpha=0.75)
+        
+        # Z-axis limits
+        ax.set_zlim(min_u, max_u)
+        ax.set_box_aspect(None, zoom=0.8)
+
+        # Axis labels
+        ax.set_xlabel(r'$x$', labelpad=5)
+        ax.set_ylabel(r'$y$', labelpad=5)
+        ax.set_zlabel(r'$u$', labelpad=10)
+
+        plt.tight_layout()
+        plt.title(title)
+        
+        # Save
+        if save:
+            plt.savefig(filename, dpi=200, facecolor='w', edgecolor='w')
+            plt.close()
+        else:
+            plt.show()
     
     def source(self, x, y):
-        """Returns the source function for the differential equation."""
-        return np.sin(np.pi * x) * np.sin(np.pi * y)
+        return numerix.sin(pi * x) * numerix.sin(pi * y)
     
-    def buildSystem(self, u):
-        """Builds the system of equations to solve the differential equation."""
-        nx, ny = self.mesh.nx, self.mesh.ny
-        hx, hy = self.mesh.hx, self.mesh.hy
-        n = (nx - 1) * (ny - 1)
-        
-        # Matrix A values at diagonal and adjacent positions
-        main_diag = - 2 / hx**2 - 2 / hy**2
-        off_diag_x = 1 / hx**2
-        off_diag_y = 1 / hy**2
-        
-        diagonals = [
-            main_diag * np.ones(n),
-            off_diag_x * np.ones(n - 1),
-            off_diag_x * np.ones(n - 1),
-            off_diag_y * np.ones(n - (nx - 1)),
-            off_diag_y * np.ones(n - (nx - 1))
-        ]
-        
-        positions = [0, -1, 1, -(nx - 1), nx - 1]
+    def solve(self, tol: float=1e-4):
+        x = self.domain.mesh.cellCenters[0]
+        y = self.domain.mesh.cellCenters[1]
 
-        # Correct the adjacency matrix to avoid connections across rows
-        for i in range(1, nx - 1):
-            diagonals[1][i * (ny - 1) - 1] = 0  # Avoids wraparound in i+1
-            diagonals[2][i * (ny - 1)] = 0      # Avoids wraparound in i-1
+        # Define PDE
+        pde = DiffusionTerm(coeff=self.k) - self.source(x, y)
 
-        A = diags(diagonals, positions, shape=(n, n)).tocsc()
-
-        # Right-hand side vector
-        x_interior = self.mesh.x[1:-1]
-        y_interior = self.mesh.y[1:-1]
-        X, Y = np.meshgrid(x_interior, y_interior, indexing='ij')
-        b = self.source(X, Y).reshape(n)
+        # Set boundary conditions (Dirichlet homogeneous)
+        self.u.constrain(0, self.domain.mesh.facesTop)
+        self.u.constrain(0, self.domain.mesh.facesBottom)
+        self.u.constrain(0, self.domain.mesh.facesLeft)
+        self.u.constrain(0, self.domain.mesh.facesRight)
         
-        return A, b
+        # Solve partial differential equation
+        while pde.sweep(var=self.u) > tol:
+            pass
+
+
+class NonLinearPoisson(object):
+
+    def __init__(self, Lx: float=1.0, Ly: float=1.0, nx: int=20, ny: int=20) -> None:
+        self.domain = Domain(Lx, Ly, nx, ny)
+        self.k = 1
+        self.u = CellVariable(mesh=self.domain.mesh, name="u")
+
+    def computeErrorL2(self, values: np.ndarray):
+        u_num = self.getSolution()
+        values_norm = np.linalg.norm(values, 2)
+        error = np.linalg.norm(values - u_num) / values_norm
+        return error
     
-    def solve(self):
-        nx, ny = self.mesh.nx, self.mesh.ny
-        u_interior = self.u[1:-1, 1:-1]
-        A, b = self.buildSystem(self.u)
-        u_interior = spsolve(A, b)
-        self.u[1:-1, 1:-1] = u_interior.reshape((nx - 1, ny - 1))
+    def computeErrorL2InPoints(self, points: np.ndarray, values: np.ndarray, method: str="linear"):
+        u_interpolated = self.interpolate(points, method)
+        values_norm = np.linalg.norm(values, 2)
+        error = np.linalg.norm(u_interpolated - values) / values_norm
+        return error
+    
+    def computeNormL2(self):
+        u_num = self.getSolution()
+        return np.linalg.norm(u_num)
+    
+    def computeNormL2InPoints(self, points: np.ndarray, method: str):
+        u_interpolated = self.interpolate(points, method)
+        return np.linalg.norm(u_interpolated)
+    
+    def getSolution(self):
+        u_bound = self.getSolutionInBoundary()
+        u_values = np.hstack([u_bound, self.u.value])
+        return u_values
+    
+    def getSolutionInBoundary(self):
+        u_left = self.u.arithmeticFaceValue[self.domain.mesh.facesLeft]
+        u_right = self.u.arithmeticFaceValue[self.domain.mesh.facesRight]
+        u_top = self.u.arithmeticFaceValue[self.domain.mesh.facesTop]
+        u_bottom = self.u.arithmeticFaceValue[self.domain.mesh.facesBottom]
+        return np.hstack([u_left, u_right, u_top, u_bottom])
+    
+    def interpolate(self, points: np.ndarray, method: str="linear"):
+        assert method in ["linear", "nearest", "cubic"], f"{method} interpolation's method not allowed."
+        coords = self.domain.getCoords()
+        u_bound = self.getSolutionInBoundary()
+        u_values = np.hstack([u_bound, self.u.value])
+        u_interp_values = griddata(points=coords, values=u_values, xi=points, 
+                                   method=method, fill_value=0.0)
+        return u_interp_values
+    
+    def plotSolution(self, figsize=(6, 4), save: bool=False, 
+                     filename: str="nonlinear_solution.png", 
+                     title: str="Non Linear Poisson - Grid"):
+        # Sample data
+        r = self.domain.getCoords()
+        x, y = r[:,0], r[:,1]
+        u = self.getSolution()
 
-    def plotExactSolution(self, figsize=(8, 5), save: bool=False, filename: str='exact_solution.png'):
         fig = plt.figure(figsize=figsize)
-        ax = fig.add_subplot(111, projection='3d')
-        X, Y = np.meshgrid(self.mesh.x, self.mesh.y, indexing='ij')
-        Z = self.exact(X, Y)
-        ax.plot_surface(X, Y, Z, cmap='viridis')
-        ax.set_title("Exact $u(x, y)$ - Linear Poisson Equation")
-        plt.tight_layout()
-        if save:
-            plt.savefig(f'figures/{filename}', dpi=300, facecolor='w', edgecolor='w')
-        plt.show()
-
-    def plotNumericalSolution(self, figsize=(8, 5), save: bool=False, filename: str='numerical_solution.png'):
-        fig = plt.figure(figsize=figsize)
-        ax = fig.add_subplot(111, projection='3d')
-        X, Y = np.meshgrid(self.mesh.x, self.mesh.y, indexing='ij')
-        Z = self.u
-        ax.plot_surface(X, Y, Z, cmap='viridis')
-        ax.set_title("Numerical $u(x, y)$ - Nonlinear Poisson Equation")
-        plt.tight_layout()
-        if save:
-            plt.savefig(f'figures/{filename}', dpi=300, facecolor='w', edgecolor='w')
-        plt.show()
-    
-
-class NonLinearPoissonFDM(object):
-    def __init__(
-            self, 
-            a: float=1.0, 
-            b: float=1.0, 
-            nx: int=10, 
-            ny: int=10, 
-            tolerance: float=1e-4, 
-            max_iter: int=5000, 
-    ):
-        self.mesh = Mesh(a, b, nx, ny)
-        self.tolerance = tolerance
-        self.max_iter = max_iter
-        self.u = np.zeros((self.mesh.nx + 1, self.mesh.ny + 1))
+        ax = fig.add_subplot(projection='3d')
         
-    def __getitem__(self, indices):
-        """Allows access to solution points using [i, j] syntax."""
-        return self.u[indices]
-    
-    def error(self, norm: str='l2'):
-        """Computes the error between the exact and numerical solutions."""
-        if norm == 'l2':
-            return np.linalg.norm(self.u, 2)
-        elif norm == 'l1':
-            return np.linalg.norm(self.u, 1)
-        elif norm == 'max':
-            return np.max(np.abs(self.u))
+        # 3D surface plot
+        min_u, max_u = u.min(), u.max()
+        levels = np.linspace(min_u, max_u, 10)
+        ax.plot_trisurf(x, y, u, cmap='viridis', antialiased=False, edgecolor='none')
+        ax.tricontour(x, y, u, levels=levels, linewidths = 1, colors="black", offset=min_u)
+        ax.tricontourf(x, y, u, levels=levels, cmap='viridis', offset=min_u, alpha=0.75)
+        
+        # Z-axis limits
+        ax.set_zlim(min_u, max_u)
+        ax.set_box_aspect(None, zoom=0.9)
+
+        # Axis labels
+        ax.set_xlabel(r'$x$', labelpad=5)
+        ax.set_ylabel(r'$y$', labelpad=5)
+        ax.set_zlabel(r'$u$', labelpad=10)
+
+        plt.title(title)
+        plt.tight_layout()
+        
+        # Save
+        if save:
+            plt.savefig(filename, dpi=100, facecolor='w', edgecolor='w')
+            plt.close()
         else:
-            raise ValueError(f"Invalid norm: {norm} is not supported.")
+            plt.show()
+
+    def plotSolutionInPoints(self, points: np.ndarray, method: str="linear", figsize=(8, 5), 
+                             save: bool=False, filename: str='nonlinear_solution.png', 
+                             title: str="Non Linear Poisson - Interpolated"):
+        # Sample data
+        x, y = points[:, 0], points[:, 1]
+        u = self.interpolate(points, method)
+
+        fig = plt.figure(figsize=figsize)
+        ax = fig.add_subplot(projection='3d')
+        
+        # 3D surface plot
+        min_u, max_u = u.min(), u.max()
+        levels = np.linspace(min_u, max_u, 10)
+        ax.plot_trisurf(x, y, u, cmap='viridis', antialiased=False, edgecolor='none')
+        ax.tricontour(x, y, u, levels=levels, linewidths = 1, colors="black", offset=min_u)
+        ax.tricontourf(x, y, u, levels=levels, cmap='viridis', offset=min_u, alpha=0.75)
+        
+        # Z-axis limits
+        ax.set_zlim(min_u, max_u)
+        ax.set_box_aspect(None, zoom=0.8)
+
+        # Axis labels
+        ax.set_xlabel(r'$x$', labelpad=5)
+        ax.set_ylabel(r'$y$', labelpad=5)
+        ax.set_zlabel(r'$u$', labelpad=10)
+
+        plt.tight_layout()
+        plt.title(title)
+        
+        # Save
+        if save:
+            plt.savefig(filename, dpi=100, facecolor='w', edgecolor='w')
+            plt.close()
+        else:
+            plt.show()
     
     def source(self, u):
-        """Returns the source function for the differential equation."""
-        return 0.5 * np.exp(u)
+        return 0.5 * numerix.exp(u)
     
-    def sourceJacobian(self, u):
-        """Jacobian of the source function."""
-        return - 0.5 * np.exp(u)
-    
-    def buildSystem(self, u):
-        nx, ny = self.mesh.nx, self.mesh.ny
-        hx, hy = self.mesh.hx, self.mesh.hy
-        n = (nx - 1) * (ny - 1)
+    def solve(self, tol: float=1e-4):
+        # Define PDE
+        pde = DiffusionTerm(coeff=self.k) - self.source(self.u)
+
+        # Set boundary conditions
+        # Bottom, Left -> u = 0
+        # Top, Right -> du = 0 (by default)
+        self.u.constrain(0, self.domain.mesh.facesBottom)
+        self.u.constrain(0, self.domain.mesh.facesLeft)
         
-        # Valores en la diagonal principal y las posiciones adyacentes de la matriz A
-        main_diag = - 2 / hx**2 - 2 / hy**2
-        off_diag_x = 1 / hx**2
-        off_diag_y = 1 / hy**2
-        
-        diagonals = [
-            main_diag * np.ones(n),
-            off_diag_x * np.ones(n - 1),
-            off_diag_x * np.ones(n - 1),
-            off_diag_y * np.ones(n - (nx - 1)),
-            off_diag_y * np.ones(n - (nx - 1))
-        ]
-        
-        positions = [0, -1, 1, -(nx - 1), nx - 1]
-
-        # Corregir la matriz de adyacencia para evitar conexiones incorrectas en filas
-        for i in range(1, nx - 1):
-            diagonals[1][i * (ny - 1) - 1] = 0  # Evita el wraparound en i+1
-            diagonals[2][i * (ny - 1)] = 0      # Evita el wraparound en i-1
-
-        A = diags(diagonals, positions, shape=(n, n)).tocsc()
-        sJ = self.sourceJacobian(u[1:-1, 1:-1]).reshape(n)
-        A = A + diags(sJ, 0).tocsc()
-
-        # Vector del lado derecho
-        u_interior = u[1:-1, 1:-1].reshape(n)
-        F = u_interior - self.source(u_interior).reshape(n)
-
-        # Condiciones de frontera Dirichlet y Neumann
-        for j in range(1, ny):
-            F[j - 1] = 0  # Dirichlet en y=0 (cara inferior)
-            F[(nx - 2) * (ny - 1) + j - 1] -= off_diag_y * self.u[1, j]  # Neumann en y=1 (cara superior)
-
-        for i in range(1, nx):
-            F[(i - 1) * (ny - 1)] = 0  # Dirichlet en x=0 (cara izquierda)
-            F[(i - 1) * (ny - 1) + ny - 2] -= off_diag_x * self.u[i, ny - 1]  # Neumann en x=1 (cara derecha)
-
-        return A, F
-
-    def solve(self):
-        nx, ny = self.mesh.nx, self.mesh.ny
-        u_interior = self.u[1:-1, 1:-1]
-
-        for i in range(self.max_iter):
-            A, F = self.buildSystem(self.u)
-            delta_u = spsolve(A, -F).reshape((nx - 1, ny - 1))
-            self.u[1:-1, 1:-1] = u_interior + delta_u
-        
-            error = 1 if i == 0 else np.linalg.norm(delta_u, ord=np.inf) / np.linalg.norm(u_interior, ord=np.inf)
-            if error < self.tolerance:
-                print(f"Convergencia lograda en {i + 1} iteraciones.")
-                break
-        else:
-            print("Advertencia: Se alcanzó el número máximo de iteraciones sin convergencia.")
-
-    def plotExactSolution(self, figsize=(8, 5), save: bool=False, filename: str='exact_solution.png'):
-        fig = plt.figure(figsize=figsize)
-        ax = fig.add_subplot(111, projection='3d')
-        X, Y = np.meshgrid(self.mesh.x, self.mesh.y, indexing='ij')
-        Z = self.exact(X, Y)
-        ax.plot_surface(X, Y, Z, cmap='viridis')
-        ax.set_title("Exact $u(x, y)$")
-        plt.tight_layout()
-        if save:
-            plt.savefig(f'figures/{filename}', dpi=300, facecolor='w', edgecolor='w')
-        plt.show()
-
-    def plotNumericalSolution(self, figsize=(8, 5), save: bool=False, filename: str='numerical_solution.png'):
-        fig = plt.figure(figsize=figsize)
-        ax = fig.add_subplot(111, projection='3d')
-        X, Y = np.meshgrid(self.mesh.x, self.mesh.y, indexing='ij')
-        Z = self.u
-        ax.plot_surface(X, Y, Z, cmap='viridis')
-        ax.set_title("Numerical $u(x, y)$")
-        plt.tight_layout()
-        if save:
-            plt.savefig(f'figures/{filename}', dpi=300, facecolor='w', edgecolor='w')
-        plt.show()
-        
+        # Solve partial differential equation
+        while pde.sweep(var=self.u) > tol:
+            pass
